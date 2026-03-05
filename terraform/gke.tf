@@ -16,4 +16,6 @@ resource "google_container_cluster" "primary" {
   }
 
   deletion_protection = false
+
+  depends_on = [google_project_service.apis["container.googleapis.com"]]
 }
