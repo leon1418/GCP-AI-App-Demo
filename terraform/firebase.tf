@@ -19,8 +19,7 @@ resource "google_identity_platform_config" "default" {
     "localhost",
     "${var.project_id}.firebaseapp.com",
     "${var.project_id}.web.app",
-    "34.68.95.255",
-    "34.68.95.255.nip.io",
+    "${var.app_name}-${data.google_project.current.number}.${var.region}.run.app",
   ]
 
   sign_in {

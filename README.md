@@ -9,10 +9,11 @@ Upload a dog photo and get instant breed identification powered by Google Gemini
 | Backend | Python + FastAPI |
 | Frontend | Vanilla HTML/CSS/JS |
 | AI Model | Gemini 2.0 Flash |
+| Auth | Firebase Authentication (Google sign-in) |
 | Image Storage | Google Cloud Storage |
 | Query History | Firestore |
-| Infrastructure | Terraform (GKE Autopilot) |
-| Deployment | Docker + Kubernetes |
+| Infrastructure | Terraform (Cloud Run) |
+| Deployment | Docker + Cloud Run |
 
 ## Quick Start
 
@@ -38,21 +39,25 @@ uv run uvicorn app.main:app --reload
 
 Open http://localhost:8000
 
-### Deploy to GKE
+### Deploy to Cloud Run
 
 ```bash
 # Provision infrastructure
 cd terraform
 terraform init
-terraform plan -var="project_id=YOUR_PROJECT" -var="gcs_bucket_name=YOUR_BUCKET"
+terraform plan
 terraform apply
 
 # Build and push Docker image
-docker build -t gcr.io/YOUR_PROJECT/dog-breed-detector .
-docker push gcr.io/YOUR_PROJECT/dog-breed-detector
+docker build --platform linux/amd64 -t REGION-docker.pkg.dev/PROJECT_ID/dog-breed-detector/app:v1 .
+docker push REGION-docker.pkg.dev/PROJECT_ID/dog-breed-detector/app:v1
 
-# Update kubernetes/configmap.yaml with your values, then:
-kubectl apply -f kubernetes/
+# Deploy to Cloud Run
+gcloud run deploy dog-breed-detector \
+  --image=REGION-docker.pkg.dev/PROJECT_ID/dog-breed-detector/app:v1 \
+  --service-account=dog-breed-detector-sa@PROJECT_ID.iam.gserviceaccount.com \
+  --set-env-vars="GCP_PROJECT_ID=PROJECT_ID,GCS_BUCKET_NAME=BUCKET_NAME,GCP_REGION=REGION,GEMINI_MODEL=gemini-2.0-flash-001" \
+  --port=8000 --allow-unauthenticated --region=REGION
 ```
 
 ## API Endpoints
@@ -62,6 +67,7 @@ kubectl apply -f kubernetes/
 | GET | `/` | Web interface |
 | POST | `/api/upload` | Upload image for breed detection |
 | GET | `/api/history?limit=20` | Session query history |
+| DELETE | `/api/history/{query_id}` | Delete a query |
 | GET | `/api/health` | Health check |
 
 ## Data Flow

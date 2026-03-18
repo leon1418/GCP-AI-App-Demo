@@ -1,12 +1,6 @@
-output "gke_cluster_name" {
-  description = "The name of the GKE Autopilot cluster"
-  value       = google_container_cluster.primary.name
-}
-
-output "gke_cluster_endpoint" {
-  description = "The endpoint of the GKE Autopilot cluster"
-  value       = google_container_cluster.primary.endpoint
-  sensitive   = true
+output "cloud_run_url" {
+  description = "The URL of the Cloud Run service"
+  value       = google_cloud_run_v2_service.app.uri
 }
 
 output "gcs_bucket_url" {

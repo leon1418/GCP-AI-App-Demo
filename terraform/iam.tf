@@ -24,13 +24,3 @@ resource "google_project_iam_member" "sa_aiplatform_user" {
   role    = "roles/aiplatform.user"
   member  = "serviceAccount:${google_service_account.app_sa.email}"
 }
-
-# Workload Identity binding - allows the Kubernetes service account to
-# impersonate the GCP service account
-resource "google_service_account_iam_member" "workload_identity_binding" {
-  service_account_id = google_service_account.app_sa.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[default/${var.app_name}-ksa]"
-
-  depends_on = [google_container_cluster.primary]
-}
